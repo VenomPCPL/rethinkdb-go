@@ -1,4 +1,4 @@
-module gopkg.in/rethinkdb/rethinkdb-go.v6
+module github.com/VenomPCPL/rethinkdb-go
 
 require (
 	github.com/bitly/go-hostpool v0.1.0 // indirect
