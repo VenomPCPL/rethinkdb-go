@@ -3,8 +3,9 @@ package rethinkdb
 import (
 	"crypto/tls"
 	"encoding/binary"
-	"encoding/json"
 	"fmt"
+	"github.com/segmentio/encoding/json"
+	"io"
 	"net"
 	"sync/atomic"
 	"time"
@@ -59,6 +60,10 @@ type Connection struct {
 	responseChan       chan responseAndError
 	stopProcessingChan chan struct{}
 	mu                 sync.Mutex
+
+	buffer           *bytes.Buffer
+	lastResponseSize int
+	lastResponseTime time.Time
 }
 
 type responseAndError struct {
@@ -131,6 +136,7 @@ func newConnection(conn net.Conn, address string, opts *ConnectOpts) *Connection
 		readRequestsChan:   make(chan tokenAndPromise, 16),
 		responseChan:       make(chan responseAndError, 16),
 		stopProcessingChan: make(chan struct{}),
+		buffer:             bytes.NewBuffer(make([]byte, 0, jsonBufferDefaultSize)),
 	}
 	return c
 }
@@ -394,9 +400,19 @@ func (c *Connection) nextToken() int64 {
 	return atomic.AddInt64(&c.token, 1)
 }
 
+const jsonBufferDefaultSize = 1024 * 256
+
 // readResponse attempts to read a Response from the server, if no response
 // could be read then an error is returned.
 func (c *Connection) readResponse() (*Response, error) {
+	if !c.lastResponseTime.IsZero() && c.lastResponseTime.Add(5*time.Minute).Before(time.Now()) {
+		if c.lastResponseSize <= jsonBufferDefaultSize {
+			c.lastResponseSize = jsonBufferDefaultSize
+		}
+		c.buffer.Reset()
+		c.buffer = bytes.NewBuffer(make([]byte, 0, c.lastResponseSize))
+		c.lastResponseTime = time.Time{}
+	}
 	// due to this is pooled connection, it always reads from socket even if idle
 	// timeouts should be only on query-level with context
 
@@ -408,19 +424,28 @@ func (c *Connection) readResponse() (*Response, error) {
 	}
 
 	responseToken := int64(binary.LittleEndian.Uint64(headerBuf[:8]))
-	messageLength := binary.LittleEndian.Uint32(headerBuf[8:])
+	messageLength := int(binary.LittleEndian.Uint32(headerBuf[8:]))
 
-	// Read the JSON encoding of the Response itself.
-	b := make([]byte, int(messageLength))
+	if messageLength > jsonBufferDefaultSize {
+		c.lastResponseTime = time.Now()
+		c.lastResponseSize = messageLength
+	}
 
-	if _, err := c.read(b); err != nil {
+	c.buffer.Reset()
+
+	if c.buffer.Cap() < messageLength {
+		oldCap := c.buffer.Cap()
+		c.buffer.Grow(messageLength - oldCap)
+	}
+	if _, err := c.buffer.ReadFrom(io.LimitReader(c.Conn, int64(messageLength))); err != nil {
 		c.setBad()
 		return nil, RQLConnectionError{rqlError(err.Error())}
 	}
 
 	// Decode the response
-	var response = new(Response)
-	if err := json.Unmarshal(b, response); err != nil {
+	response := new(Response)
+
+	if err := json.Unmarshal(c.buffer.Bytes(), response); err != nil {
 		c.setBad()
 		return nil, RQLDriverError{rqlError(err.Error())}
 	}

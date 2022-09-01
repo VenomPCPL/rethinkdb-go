@@ -3,8 +3,8 @@ package rethinkdb
 import (
 	"bytes"
 	"encoding/binary"
-	"encoding/json"
 	"fmt"
+	"github.com/segmentio/encoding/json"
 	"github.com/stretchr/testify/mock"
 	test "gopkg.in/check.v1"
 	"gopkg.in/rethinkdb/rethinkdb-go.v6/encoding"

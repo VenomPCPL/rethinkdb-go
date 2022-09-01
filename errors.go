@@ -2,9 +2,9 @@ package rethinkdb
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/segmentio/encoding/json"
 	"strings"
 
 	p "gopkg.in/rethinkdb/rethinkdb-go.v6/ql2"

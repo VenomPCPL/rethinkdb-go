@@ -2,7 +2,7 @@ package rethinkdb
 
 import (
 	"encoding/base64"
-	"encoding/json"
+	"github.com/segmentio/encoding/json"
 
 	"reflect"
 
@@ -16,25 +16,25 @@ import (
 // When evaluating structs they are encoded into a map before being sent to the
 // server. Each exported field is added to the map unless
 //
-//  - the field's tag is "-", or
-//  - the field is empty and its tag specifies the "omitempty" option.
+//   - the field's tag is "-", or
+//   - the field is empty and its tag specifies the "omitempty" option.
 //
 // Each fields default name in the map is the field name but can be specified
 // in the struct field's tag value. The "rethinkdb" key in the struct field's
 // tag value is the key name, followed by an optional comma and options. Examples:
 //
-//   // Field is ignored by this package.
-//   Field int `rethinkdb:"-"`
-//   // Field appears as key "myName".
-//   Field int `rethinkdb:"myName"`
-//   // Field appears as key "myName" and
-//   // the field is omitted from the object if its value is empty,
-//   // as defined above.
-//   Field int `rethinkdb:"myName,omitempty"`
-//   // Field appears as key "Field" (the default), but
-//   // the field is skipped if empty.
-//   // Note the leading comma.
-//   Field int `rethinkdb:",omitempty"`
+//	// Field is ignored by this package.
+//	Field int `rethinkdb:"-"`
+//	// Field appears as key "myName".
+//	Field int `rethinkdb:"myName"`
+//	// Field appears as key "myName" and
+//	// the field is omitted from the object if its value is empty,
+//	// as defined above.
+//	Field int `rethinkdb:"myName,omitempty"`
+//	// Field appears as key "Field" (the default), but
+//	// the field is skipped if empty.
+//	// Note the leading comma.
+//	Field int `rethinkdb:",omitempty"`
 func Expr(val interface{}) Term {
 	if val == nil {
 		return Term{
@@ -236,11 +236,11 @@ func Args(args ...interface{}) Term {
 // expects either a byte array/slice or a bytes.Buffer.
 //
 // Only a limited subset of ReQL commands may be chained after binary:
-//  - coerceTo can coerce binary objects to string types
-//  - count will return the number of bytes in the object
-//  - slice will treat bytes like array indexes (i.e., slice(10,20) will return bytes 10–19)
-//  - typeOf returns PTYPE<BINARY>
-//  - info will return information on a binary object.
+//   - coerceTo can coerce binary objects to string types
+//   - count will return the number of bytes in the object
+//   - slice will treat bytes like array indexes (i.e., slice(10,20) will return bytes 10–19)
+//   - typeOf returns PTYPE<BINARY>
+//   - info will return information on a binary object.
 func Binary(data interface{}) Term {
 	var b []byte
 
@@ -316,9 +316,9 @@ func (t Term) Branch(args ...interface{}) Term {
 // It takes one argument of type `func (r.Term) interface{}`, for
 // example clones a table:
 //
-//     r.Table("table").ForEach(func (row r.Term) interface{} {
-//         return r.Table("new_table").Insert(row)
-//     })
+//	r.Table("table").ForEach(func (row r.Term) interface{} {
+//	    return r.Table("new_table").Insert(row)
+//	})
 func (t Term) ForEach(args ...interface{}) Term {
 	return constructMethodTerm(t, "Foreach", p.Term_FOR_EACH, funcWrapArgs(args), map[string]interface{}{})
 }

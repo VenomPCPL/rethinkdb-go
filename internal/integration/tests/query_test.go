@@ -2,7 +2,7 @@ package tests
 
 import (
 	"bytes"
-	"encoding/json"
+	"github.com/segmentio/encoding/json"
 	"sync"
 	"testing"
 	"time"

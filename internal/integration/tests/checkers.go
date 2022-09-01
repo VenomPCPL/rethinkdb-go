@@ -1,8 +1,8 @@
 package tests
 
 import (
-	"encoding/json"
 	"fmt"
+	"github.com/segmentio/encoding/json"
 
 	test "gopkg.in/check.v1"
 

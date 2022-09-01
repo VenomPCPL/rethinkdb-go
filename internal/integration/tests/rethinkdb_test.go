@@ -1,9 +1,9 @@
 package tests
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/segmentio/encoding/json"
 	"math/rand"
 	"os"
 	"runtime"
@@ -53,9 +53,7 @@ func init() {
 	}
 }
 
-//
 // Begin TestMain(), Setup, Teardown
-//
 func testSetup(m *testing.M) {
 	var err error
 	session, err = r.Connect(r.ConnectOpts{

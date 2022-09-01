@@ -2,8 +2,8 @@ package rethinkdb
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
+	"github.com/segmentio/encoding/json"
 	"reflect"
 	"sync"
 
@@ -48,16 +48,16 @@ func newCursor(ctx context.Context, conn *Connection, cursorType string, token i
 // by a single goroutine at any given time. Use Next to advance through the
 // rows:
 //
-//     cursor, err := query.Run(session)
-//     ...
-//     defer cursor.Close()
+//	cursor, err := query.Run(session)
+//	...
+//	defer cursor.Close()
 //
-//     var response interface{}
-//     for cursor.Next(&response) {
-//         ...
-//     }
-//     err = cursor.Err() // get any error encountered during iteration
-//     ...
+//	var response interface{}
+//	for cursor.Next(&response) {
+//	    ...
+//	}
+//	err = cursor.Err() // get any error encountered during iteration
+//	...
 type Cursor struct {
 	releaseConn func() error
 
@@ -471,16 +471,16 @@ func (c *Cursor) Interface() (interface{}, error) {
 //
 // Also note that this function returns immediately.
 //
-//     cursor, err := r.Expr([]int{1,2,3}).Run(session)
-//     if err != nil {
-//         panic(err)
-//     }
+//	cursor, err := r.Expr([]int{1,2,3}).Run(session)
+//	if err != nil {
+//	    panic(err)
+//	}
 //
-//     ch := make(chan int)
-//     cursor.Listen(ch)
-//     <- ch // 1
-//     <- ch // 2
-//     <- ch // 3
+//	ch := make(chan int)
+//	cursor.Listen(ch)
+//	<- ch // 1
+//	<- ch // 2
+//	<- ch // 3
 func (c *Cursor) Listen(channel interface{}) {
 	go func() {
 		channelv := reflect.ValueOf(channel)

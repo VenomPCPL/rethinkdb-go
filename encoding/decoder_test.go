@@ -2,8 +2,8 @@ package encoding
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
+	"github.com/segmentio/encoding/json"
 	"image"
 	"reflect"
 	"testing"

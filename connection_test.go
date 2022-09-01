@@ -2,9 +2,9 @@ package rethinkdb
 
 import (
 	"encoding/binary"
-	"encoding/json"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/mocktracer"
+	"github.com/segmentio/encoding/json"
 	"github.com/stretchr/testify/mock"
 	"golang.org/x/net/context"
 	test "gopkg.in/check.v1"
